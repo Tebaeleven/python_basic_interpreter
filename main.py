@@ -1,7 +1,7 @@
 def main():
     """
-    数字1 {+|-|*|/} 数字2
-    0     1        2    1
+    数字1 {{+|-|*|/} 数字2 | = }・・・
+    0     1        2     1   1
     """
     state=0
     while True:
@@ -18,6 +18,10 @@ def main():
             continue
         if state == 1:
             # 演算子の入力
+            if st=="=":
+                print(a)
+                state=1
+                continue
             if len(st)!=1 or st not in "+-*/":
                 print("演算子(+,-,*,/)ではない")
                 continue
@@ -40,7 +44,7 @@ def main():
                 a*=b
             elif op =="/":
                 a/=b
-            print(a)
+            # print(a)
             continue
 
 
