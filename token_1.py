@@ -28,9 +28,18 @@ def make_token(st):
     ch=inp.pop()
 
     while ch != "\n":
-        if ch in "+-*/()":
+        if ch in "*/()":
             tokens.append(Token(Tk.RESWD,ch))
             ch=inp.pop()
+            continue
+        if ch in "+-":
+            if len(tokens)>0:
+                tkn=tokens[-1]
+                if tkn.type == Tk.NUMLIT or tkn.type==Tk.RESWD and tkn.image==")":
+                    tokens.append(Token(Tk.RESWD,ch))
+                    ch=inp.pop()
+                    continue
+            tokens.append(tkn_numlit())
             continue
         # 数字トークン
         if "0"<=ch <="9" or ch == ".":
@@ -59,7 +68,7 @@ def tkn_numlit():
 	image = ""
 	state = 0
 	
-	while "0" <= ch <= "9" or ch == ".":
+	while "0" <= ch <= "9" or ch in ".+-":
 		if state == 0:
 			if ch in "+-":
 				state = 1
@@ -102,6 +111,6 @@ def tkn_numlit():
 
 
 if __name__ == "__main__":
-    tokens= make_token("123+12.5-.123")
+    tokens= make_token("+12-+56*(3-5*-4)-2")
     for token in tokens:
         print(token.type,token.image)
