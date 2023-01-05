@@ -1,6 +1,7 @@
 def main():
     """
     数字1 {+|-|*|/} 数字2
+    0     1        2    1
     """
     state=0
     while True:
@@ -29,16 +30,17 @@ def main():
                 print("数字ではありません")
                 continue
             b=float(st)
-            state=0
+            state=1
             # 計算して表示
             if op== "+":
-                print (a+b)
+                a+=b
             elif op =="-":
-                print(a-b)
+                a-=b
             elif op =="*":
-                print(a*b)
+                a*=b
             elif op =="/":
-                print(a/b)
+                a/=b
+            print(a)
             continue
 
 
