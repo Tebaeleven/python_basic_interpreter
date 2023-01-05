@@ -9,23 +9,35 @@ class Token:
         self.type = type
         self.image = image
 
+class Que:
+    def __init__(self,st):
+        self.buff=st+"\n"
+        self.pos=-1
+
+    def pop(self):
+        self.pos+=1
+        return self.buff[self.pos]
+
 def make_token(st):
+    global inp,ch
+    
     tokens=[]
 
-    st +="\n"
-    pos=0
+    inp=Que(st) 
 
-    ch=st[pos]
+    ch=inp.pop()
 
     while ch != "\n":
         if ch in "+-*/()":
             tokens.append(Token(Tk.RESWD,ch))
-            pos+=1
-            ch=st[pos]
+            ch=inp.pop()
+            continue
+        # 数字トークン
+        if "0"<=ch <="9" or ch == ".":
+            tokens.append(tkn_numlit())
             continue
         if ch == " ":
-            pos+=1
-            ch=st[pos]
+            ch=inp.pop()
             continue
         print("許されない文字がある"+"["+str(ch)+"]")
         return[Token(Tk.END,"")]
@@ -33,7 +45,63 @@ def make_token(st):
     tokens.append(Token(Tk.END,""))
     return tokens
 
+def tkn_numlit():
+
+	'''
+	数字定数トークンの作成
+		[+|-] { {0-9}… | [0-9]… .{0-9}… }
+	'''
+	global inp, ch
+	
+	decimal_point = False
+	integer = 0
+	decimal = 0
+	image = ""
+	state = 0
+	
+	while "0" <= ch <= "9" or ch == ".":
+		if state == 0:
+			if ch in "+-":
+				state = 1
+				image += ch
+				ch = inp.pop()
+				continue
+			state = 1
+			continue
+		if state == 1:
+			if "0" <= ch <= "9":
+				integer += 1
+				image += ch
+				state = 1
+				ch = inp.pop()
+				continue
+			if ch == ".":
+				decimal_point = True
+				image += ch
+				state = 2
+				ch = inp.pop()
+				continue
+			break
+		if state == 2:
+			if "0" <= ch <= "9":
+				decimal += 1
+				image += ch
+				state = 2
+				ch = inp.pop()
+				continue
+			break
+
+	if decimal_point and decimal == 0:
+		print("数字として正しくない")
+		return Token(Tk.END, "")
+	if not decimal_point and integer == 0:
+		print("数字として正しくない")
+		return Token(Tk.END, "")
+
+	return Token(Tk.NUMLIT, image)
+
+
 if __name__ == "__main__":
-    tokens= make_token("+ - * / ( ) ")
+    tokens= make_token("123+12.5-.123")
     for token in tokens:
         print(token.type,token.image)
