@@ -25,6 +25,8 @@ def main():
     """
     stk=Stack()
     state=0
+    # 括弧
+    paren=0
     while True:
         stk.print()
         #print("stateの数"+str(state))
@@ -32,6 +34,12 @@ def main():
         if st.upper() == "QUIT":
             break
         if state == 0:
+            # 「(」の入力
+            if st=="(":
+                paren+=1
+                stk.push(st)
+                state=0
+                continue
             # 数字1の入力
             if not isNumeric(st):
                 print("数字ではありません")
@@ -40,6 +48,47 @@ def main():
             state=1
             continue
         if state == 1:
+            # 「)」の入力
+            if st==")":
+                if paren == 0:
+                    print("括弧の数がおかしいです")
+                    continue
+                paren-=1
+                b=stk.pop()
+                op=stk.pop()
+                if op in "+-":
+                    a=stk.pop()
+                    if op =="+":
+                        a+=b
+                    else:
+                        a-=b
+                    b=a
+                    stk.pop() # 「(」の読み飛ばし
+                else: # 「(」のはず
+                    pass
+                if stk.size()==0:
+                    stk.push(b)
+                    state=1
+                    continue
+                op=stk.pop()
+                if op in "+-*/":
+                    a=stk.pop()
+                    if op=="+":
+                        a+=b
+                    if op=="-":
+                        a-=b
+                    if op=="*":
+                        a*=b
+                    if op=="/":
+                        a/=b
+                    stk.push(a)
+                    state=1
+                    continue
+                # opが「(」場合
+                stk.push(op)
+                stk.push(b)
+                state=1
+                continue
             # 演算子の入力
             if st=="=":
                 if stk.size()==1:
@@ -63,21 +112,32 @@ def main():
             if op in "*/":
                 stk.push(st)
             else: # +,-
-                if stk.size()==3:
+                if stk.size()>=3: 
                     b=stk.pop()
                     op1=stk.pop()
-                    a=stk.pop()
-                    if op1=="+":
-                        a+=b
-                    else:
-                        a-=b
-                    stk.push(a)
-                    stk.push(op)
+                    if op1 in "+-":
+                        a=stk.pop()
+                        if op1=="+":
+                            a+=b
+                        else:
+                            a-=b
+                        stk.push(a)
+                        stk.push(op)
+                    else: # 「(」のはず
+                        stk.push(op1)
+                        stk.push(b)
+                        stk.push(op)
                 else:
                     stk.push(op)
             state=2
             continue
         if state == 2:
+            # 「(」の入力
+            if st == "(":
+                paren+=1
+                stk.push(st)
+                state=0
+                continue
             # 数字2の入力
             if not isNumeric(st):
                 print("数字ではありません")
