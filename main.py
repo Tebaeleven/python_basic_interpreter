@@ -24,6 +24,7 @@ def expression(tokens):
     数字1 {{+|-|*|/} 数字2 | = }・・・
     0     1        2     1   1
     """
+    global print_stk
     stk=Stack()
     state=0
     # 括弧
@@ -31,7 +32,8 @@ def expression(tokens):
 
     tkn=tokens.pop(0)
     while tkn.type != Tk.END:
-        stk.print()
+        if print_stk:
+            stk.print()
         if state == 0:
             # 「(」の入力
             if tkn.isRes("("):
@@ -42,7 +44,7 @@ def expression(tokens):
                 continue
             # 数字1の入力
             if tkn.type!=Tk.NUMLIT:
-                print("数字ではありません")
+                print_msg("E001:数字ではありません",tkn.pos)
                 return None
 
             stk.push(float(tkn.image))
@@ -54,7 +56,7 @@ def expression(tokens):
             if tkn.isRes(")"):
 
                 if paren == 0:
-                    print("括弧の数がおかしいです")
+                    print_msg("E002:括弧の数がおかしいです",tkn.pos)
                     return None
                 paren-=1
                 b=stk.pop()
@@ -97,7 +99,7 @@ def expression(tokens):
                 continue
 
             if tkn.type !=Tk.RESWD or tkn.image not in "+-*/":
-                print("演算子(+,-,*,/)ではない")
+                print_msg("E003:演算子(+,-,*,/)ではない",tkn.pos)
                 return None
             op=tkn.image
             if op in "*/":
@@ -133,7 +135,7 @@ def expression(tokens):
                 continue
             # 数字2の入力
             if tkn.type != Tk.NUMLIT: 
-                print("数字ではありません")
+                print_msg("E004:数字ではありません",tkn.pos)
                 return None
             b=float(tkn.image)
             op=stk.pop()
@@ -152,8 +154,13 @@ def expression(tokens):
             tkn=tokens.pop(0)
             continue
     if state !=1:
-        print("計算式誤り")
+        print_msg("計算式誤り",0)
         return None
+
+    if paren>0:
+        print_msg("E006:括弧の対応が取れていない",0)
+        return None
+
     # 演算子の入力
     if stk.size()==1:
         a=stk.pop()
@@ -168,14 +175,32 @@ def expression(tokens):
     return a
 
 def main():
+    global print_stk
+    print_tkn=False
+    print_stk=False
     while True:
         st=input(">")
         if st.upper()=="QUIT":
             break
+        if st.upper()=="TOKEN ON":
+            print_tkn=True
+            continue
+        if st.upper()=="TOKEN OFF":
+            print_tkn=False
+            continue
+        if st.upper()=="STACK ON":
+            print_stk=True
+            continue
+        if st.upper()=="STACK OFF":
+            print_stk=False
+            continue
         # トークン列を作成する
         tokens=make_token(st)
-        for token in tokens:
-            print(token.type,token.image)
+        if tokens == None:
+            continue
+        if print_tkn:
+            for token in tokens:
+                print(token.type,token.image)
         # トークンを使って計算する
         ans = expression(tokens)
         if ans !=None:
