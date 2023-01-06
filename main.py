@@ -202,8 +202,10 @@ def main():
             for token in tokens:
                 print(token.type,token.image)
         # トークンを使って計算する
-        ans = expression(tokens)
-        if ans !=None:
-            print(ans)
+        tkn=tokens.pop(0)
+        if tkn.isRes("print"):
+            ans = expression(tokens) 
+            if ans !=None:
+                print(ans)
 if __name__ == '__main__':
     main()

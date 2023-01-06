@@ -1,8 +1,11 @@
 from enum import Enum
 
 class Tk(Enum):
-	(RESWD,NUMLIT,END)=range(3)
+	(RESWD,NUMLIT,VAR,END)=range(4)
 
+restbl=[
+	"print",
+]
 class Token:
 	"""トークン"""
 	def __init__(self,type,image,pos):
@@ -53,6 +56,16 @@ def make_token(st):
 		if "0"<=ch <="9" or ch == ".":
 			tkn=tkn_numlit()
 			if tkn != None:
+				tokens.append(tkn)
+			else:
+				return None
+			continue
+		if "a" <= ch <= "z" or "A" <= ch <= "Z" or ch == "_":
+			tkn=tkn_variable()
+			if tkn != None:
+				# 予約語だった場合、タイプを予約語にして追加
+				if tkn.image in restbl:
+					tkn.type = Tk.RESWD
 				tokens.append(tkn)
 			else:
 				return None
@@ -125,6 +138,19 @@ def tkn_numlit():
 def print_msg(msg,pos):
 	print("-"*(pos + 1)+"↑")
 	print(msg)
+
+def tkn_variable():
+	"""
+	変数トークンの作成
+	{a-z|A-Z|_}[a-z|A-Z|_|0-9]・・・
+	"""
+	global inp,ch
+	startPos=inp.currPos()
+	img=""
+	while "a" <= ch <= "z" or "A" <= ch <= "Z" or ch == "_" or "0" <= ch <="9":
+		img+=ch
+		ch=inp.pop()
+	return Token(Tk.VAR,img,startPos)
 
 if __name__ == "__main__":
 	while True:
