@@ -21,8 +21,8 @@ class Stack:
 
 def expression(tokens):
     """
-    数字1 {{+|-|*|/} 数字2 | = }・・・
-    0     1        2     1   1
+    数字1または変数1 {{+|-|*|/} 数字2または変数2 | = }・・・
+    0               1        2              1   1
     """
     global print_stk
     stk=Stack()
@@ -42,7 +42,20 @@ def expression(tokens):
                 state=0
                 tkn=tokens.pop(0)
                 continue
-            # 数字1の入力
+            # 数字1または変数1の入力
+            
+            # 変数だった場合
+            if tkn.type==Tk.VAR:
+                # 今までに定義されている変数か判定
+                if tkn.image in assign.keys():
+                    stk.push(float(assign[tkn.image]))
+                    state=1
+                    tkn=tokens.pop(0)
+                    continue
+                else:
+                    print_msg("E005:未定義の変数",tkn.pos)
+                    return None
+            # 
             if tkn.type!=Tk.NUMLIT:
                 print_msg("E001:数字ではありません",tkn.pos)
                 return None
@@ -133,11 +146,20 @@ def expression(tokens):
                 state=0
                 tkn=tokens.pop(0)
                 continue
-            # 数字2の入力
-            if tkn.type != Tk.NUMLIT: 
+            # 数字2、変数2の入力
+            # 変数だった場合
+            if tkn.type==Tk.VAR:
+                # 今までに定義されている変数か判定
+                if tkn.image in assign.keys():
+                    b=float(assign[tkn.image])
+                else:
+                    print_msg("E005:未定義の変数",tkn.pos)
+                    return None
+            elif tkn.type == Tk.NUMLIT: 
+                b=float(tkn.image)
+            else:
                 print_msg("E004:数字ではありません",tkn.pos)
                 return None
-            b=float(tkn.image)
             op=stk.pop()
             a=stk.pop()
             if op in "*/":
@@ -175,9 +197,10 @@ def expression(tokens):
     return a
 
 def main():
-    global print_stk
+    global print_stk,assign
     print_tkn=False
     print_stk=False
+    assign={}
     while True:
         st=input(">")
         if st.upper()=="QUIT":
@@ -194,6 +217,9 @@ def main():
         if st.upper()=="STACK OFF":
             print_stk=False
             continue
+        if st.upper()=="PRINT_VAR":
+            print(assign)
+            continue
         # トークン列を作成する
         tokens=make_token(st)
         if tokens == None:
@@ -207,5 +233,17 @@ def main():
             ans = expression(tokens) 
             if ans !=None:
                 print(ans)
+            continue
+        if tkn.type==Tk.VAR: #代入文とみなす
+            var =tkn 
+            tkn=tokens.pop(0)
+            if tkn.isRes("="):
+                ans=expression(tokens) 
+                if ans !=None:
+                    assign[var.image] = ans
+                else:
+                    print_msg("A001:代入文の「＝」がない",tkn.pos)
+            continue
+
 if __name__ == '__main__':
     main()

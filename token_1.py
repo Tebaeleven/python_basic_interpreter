@@ -35,20 +35,20 @@ def make_token(st):
 	ch=inp.pop()
 
 	while ch != "\n":
-		if ch in "*/()":
+		if ch in "*/()=":
 			tokens.append(Token(Tk.RESWD,ch,inp.currPos()))
 			ch=inp.pop()
 			continue
 		if ch in "+-":
 			if len(tokens)>0:
 				tkn=tokens[-1]
-				if tkn.type == Tk.NUMLIT or tkn.type==Tk.RESWD and tkn.image==")":
+				if tkn.type == Tk.NUMLIT or tkn.isRes(")") or Tk.VAR:
 					tokens.append(Token(Tk.RESWD,ch,inp.currPos()))
 					ch=inp.pop()
 					continue
 			tkn=tkn_numlit()
 			if tkn != None:
-				tokens.append(tkn)
+				tokens.append(tkn) 
 			else:
 				return None
 			continue
