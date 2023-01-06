@@ -8,6 +8,8 @@ class Token:
     def __init__(self,type,image):
         self.type = type
         self.image = image
+    def isRes(self,st):
+        return self.type == Tk.RESWD and self.image == st
 
 class Que:
     def __init__(self,st):

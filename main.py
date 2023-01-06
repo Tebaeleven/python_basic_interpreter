@@ -1,3 +1,4 @@
+from token_1 import *
 class Stack:
     """スタック"""
     def __init__(self):
@@ -18,7 +19,7 @@ class Stack:
     def print(self):
             print(self.buff)
 
-def main():
+def expression(tokens):
     """
     数字1 {{+|-|*|/} 数字2 | = }・・・
     0     1        2     1   1
@@ -27,32 +28,34 @@ def main():
     state=0
     # 括弧
     paren=0
-    while True:
+
+    tkn=tokens.pop(0)
+    while tkn.type != Tk.END:
         stk.print()
-        #print("stateの数"+str(state))
-        st=input(">")
-        if st.upper() == "QUIT":
-            break
         if state == 0:
             # 「(」の入力
-            if st=="(":
+            if tkn.isRes("("):
                 paren+=1
-                stk.push(st)
+                stk.push("(")
                 state=0
+                tkn=tokens.pop(0)
                 continue
             # 数字1の入力
-            if not isNumeric(st):
+            if tkn.type!=Tk.NUMLIT:
                 print("数字ではありません")
-                continue
-            stk.push(float(st))
+                return None
+
+            stk.push(float(tkn.image))
             state=1
+            tkn=tokens.pop(0)
             continue
         if state == 1:
             # 「)」の入力
-            if st==")":
+            if tkn.isRes(")"):
+
                 if paren == 0:
                     print("括弧の数がおかしいです")
-                    continue
+                    return None
                 paren-=1
                 b=stk.pop()
                 op=stk.pop()
@@ -69,6 +72,7 @@ def main():
                 if stk.size()==0:
                     stk.push(b)
                     state=1
+                    tkn=tokens.pop(0)
                     continue
                 op=stk.pop()
                 if op in "+-*/":
@@ -83,34 +87,21 @@ def main():
                         a/=b
                     stk.push(a)
                     state=1
+                    tkn=tokens.pop(0)
                     continue
                 # opが「(」場合
                 stk.push(op)
                 stk.push(b)
                 state=1
+                tkn=tokens.pop(0)
                 continue
-            # 演算子の入力
-            if st=="=":
-                if stk.size()==1:
-                    a=stk.pop()
-                else:
-                    b=stk.pop()
-                    op=stk.pop()
-                    a=stk.pop()
-                    if op=="+":
-                        a+=b
-                    else:
-                        a-=b
-                print(a)
-                stk.push(a)
-                state=1
-                continue
-            if len(st)!=1 or st not in "+-*/":
+
+            if tkn.type !=Tk.RESWD or tkn.image not in "+-*/":
                 print("演算子(+,-,*,/)ではない")
-                continue
-            op=st
+                return None
+            op=tkn.image
             if op in "*/":
-                stk.push(st)
+                stk.push(op)
             else: # +,-
                 if stk.size()>=3: 
                     b=stk.pop()
@@ -130,19 +121,21 @@ def main():
                 else:
                     stk.push(op)
             state=2
+            tkn=tokens.pop(0)
             continue
         if state == 2:
             # 「(」の入力
-            if st == "(":
+            if tkn.isRes("("):
                 paren+=1
-                stk.push(st)
+                stk.push("(")
                 state=0
+                tkn=tokens.pop(0)
                 continue
             # 数字2の入力
-            if not isNumeric(st):
+            if tkn.type != Tk.NUMLIT: 
                 print("数字ではありません")
-                continue
-            b=float(st)
+                return None
+            b=float(tkn.image)
             op=stk.pop()
             a=stk.pop()
             if op in "*/":
@@ -156,67 +149,36 @@ def main():
                 stk.push(op)
                 stk.push(b)
             state=1
+            tkn=tokens.pop(0)
             continue
+    if state !=1:
+        print("計算式誤り")
+        return None
+    # 演算子の入力
+    if stk.size()==1:
+        a=stk.pop()
+    else:
+        b=stk.pop()
+        op=stk.pop()
+        a=stk.pop()
+        if op=="+":
+            a+=b
+        else:
+            a-=b
+    return a
 
-
-def isNumeric(st):
-    """
-    数字（少数含む）かどうかのチェックルーチン
-        [+|-]{{0-9}・・・|[0-9]・・・ .[0-9]・・・}
-    """
-    st +="\n"
-    pos=0
-    # 小数点があるか
-    decimal_point=False
-    # 数字
-    integer=0
-    # 小数
-    decimal=0
-    state=0
+def main():
     while True:
-        # +,-判定
-        ch = st[pos]
-        if state==0:
-            if ch in "+-":
-                state=1
-                pos=pos+1
-                continue
-            state=1
-            continue
-        # 整数、小数判定
-        if state ==1:
-            if "0" <= ch <= "9":
-                integer+=1
-                state=1
-                pos+=1
-                continue
-            if ch == ".":
-                decimal_point=True
-                state=2
-                pos+=1
-                continue
-            state=100
-            continue
-        # 小数の後の整数判定
-        if state==2:
-            if "0" <= ch <= "9":
-                decimal+=1
-                state=2
-                pos+=1
-                continue
-            state=100
-            continue
-        if state==100:
-            # 小数点があるのに小数がない場合
-            if decimal_point and decimal==0:
-                return False
-            # 小数点がないのに数字が0個の場合
-            if not decimal_point and integer==0:
-                return False
-            if ch=="\n":
-                return True
-            return False
-
-
+        st=input(">")
+        if st.upper()=="QUIT":
+            break
+        # トークン列を作成する
+        tokens=make_token(st)
+        for token in tokens:
+            print(token.type,token.image)
+        # トークンを使って計算する
+        ans = expression(tokens)
+        if ans !=None:
+            print(ans)
 if __name__ == '__main__':
     main()
