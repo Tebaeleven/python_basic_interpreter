@@ -1,60 +1,70 @@
 from enum import Enum
 
 class Tk(Enum):
-    (RESWD,NUMLIT,END)=range(3)
+	(RESWD,NUMLIT,END)=range(3)
 
 class Token:
-    """トークン"""
-    def __init__(self,type,image):
-        self.type = type
-        self.image = image
-    def isRes(self,st):
-        return self.type == Tk.RESWD and self.image == st
+	"""トークン"""
+	def __init__(self,type,image,pos):
+		self.type = type
+		self.image = image
+		self.pos=pos
+	def isRes(self,st):
+		return self.type == Tk.RESWD and self.image == st
 
 class Que:
-    def __init__(self,st):
-        self.buff=st+"\n"
-        self.pos=-1
+	def __init__(self,st):
+		self.buff=st+"\n"
+		self.pos=-1
 
-    def pop(self):
-        self.pos+=1
-        return self.buff[self.pos]
-
+	def pop(self):
+		self.pos+=1
+		return self.buff[self.pos]
+	def currPos(self):
+		return self.pos
 def make_token(st):
-    global inp,ch
-    
-    tokens=[]
+	global inp,ch
+	
+	tokens=[]
 
-    inp=Que(st) 
+	inp=Que(st) 
 
-    ch=inp.pop()
+	ch=inp.pop()
 
-    while ch != "\n":
-        if ch in "*/()":
-            tokens.append(Token(Tk.RESWD,ch))
-            ch=inp.pop()
-            continue
-        if ch in "+-":
-            if len(tokens)>0:
-                tkn=tokens[-1]
-                if tkn.type == Tk.NUMLIT or tkn.type==Tk.RESWD and tkn.image==")":
-                    tokens.append(Token(Tk.RESWD,ch))
-                    ch=inp.pop()
-                    continue
-            tokens.append(tkn_numlit())
-            continue
-        # 数字トークン
-        if "0"<=ch <="9" or ch == ".":
-            tokens.append(tkn_numlit())
-            continue
-        if ch == " ":
-            ch=inp.pop()
-            continue
-        print("許されない文字がある"+"["+str(ch)+"]")
-        return[Token(Tk.END,"")]
+	while ch != "\n":
+		if ch in "*/()":
+			tokens.append(Token(Tk.RESWD,ch,inp.currPos()))
+			ch=inp.pop()
+			continue
+		if ch in "+-":
+			if len(tokens)>0:
+				tkn=tokens[-1]
+				if tkn.type == Tk.NUMLIT or tkn.type==Tk.RESWD and tkn.image==")":
+					tokens.append(Token(Tk.RESWD,ch,inp.currPos()))
+					ch=inp.pop()
+					continue
+			tkn=tkn_numlit()
+			if tkn != None:
+				tokens.append(tkn)
+			else:
+				return None
+			continue
+		# 数字トークン
+		if "0"<=ch <="9" or ch == ".":
+			tkn=tkn_numlit()
+			if tkn != None:
+				tokens.append(tkn)
+			else:
+				return None
+			continue
+		if ch == " ":
+			ch=inp.pop()
+			continue
+		print_msg("L003:許されない文字がある"+"["+str(ch)+"]",inp.currPos())
+		return None
 
-    tokens.append(Token(Tk.END,""))
-    return tokens
+	tokens.append(Token(Tk.END,"",-1))
+	return tokens
 
 def tkn_numlit():
 
@@ -70,6 +80,7 @@ def tkn_numlit():
 	image = ""
 	state = 0
 	
+	startPos=inp.currPos()
 	while "0" <= ch <= "9" or ch in ".+-":
 		if state == 0:
 			if ch in "+-":
@@ -103,16 +114,25 @@ def tkn_numlit():
 			break
 
 	if decimal_point and decimal == 0:
-		print("数字として正しくない")
-		return Token(Tk.END, "")
+		print_msg("L001:数字として正しくない",inp.currPos())
+		return None
 	if not decimal_point and integer == 0:
-		print("数字として正しくない")
-		return Token(Tk.END, "")
+		print_msg("L002:数字として正しくない",inp.currPos())
+		return None
 
-	return Token(Tk.NUMLIT, image)
+	return Token(Tk.NUMLIT, image,startPos)
 
+def print_msg(msg,pos):
+	print("-"*(pos + 1)+"↑")
+	print(msg)
 
 if __name__ == "__main__":
-    tokens= make_token("+12-+56*(3-5*-4)-2")
-    for token in tokens:
-        print(token.type,token.image)
+	while True:
+		st=input(">")
+		if st.upper()=="QUIT":
+			break
+		# トークン列を作成する
+		tokens=make_token(st)
+		if tokens != None:
+			for token in tokens:
+				print(token.type,token.image)
