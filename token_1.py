@@ -42,7 +42,7 @@ def make_token(st):
 		if ch in "+-":
 			if len(tokens)>0:
 				tkn=tokens[-1]
-				if tkn.type == Tk.NUMLIT or tkn.isRes(")") or Tk.VAR:
+				if tkn.type == Tk.NUMLIT or tkn.isRes(")") or tkn.type == Tk.VAR:
 					tokens.append(Token(Tk.RESWD,ch,inp.currPos()))
 					ch=inp.pop()
 					continue
