@@ -43,7 +43,18 @@ def expression(tokens):
                 tkn=tokens.pop(0)
                 continue
             # 数字1または変数1の入力
-            
+            if tkn.isRes("+"):
+                #特に何もしない
+                state=0
+                tkn=tokens.pop(0)
+                continue
+            if tkn.isRes("-"):
+                #a = - aを a=-1 * aに変換
+                tokens.insert(0,Token(Tk.RESWD,"*",-1))
+                tokens.insert(0,Token(Tk.NUMLIT,"-1",-1))
+                state=0
+                tkn=tokens.pop(0)
+                continue 
             # 変数だった場合
             if tkn.type==Tk.VAR:
                 # 今までに定義されている変数か判定
@@ -147,6 +158,18 @@ def expression(tokens):
                 tkn=tokens.pop(0)
                 continue
             # 数字2、変数2の入力
+            # 単項演算子の入力
+            if tkn.isRes("+"):
+                #特に何もしない
+                tkn=tokens.pop(0)
+                continue
+            if tkn.isRes("-"):
+                #a = - aを a=-1 * aに変換
+                tokens.insert(0,Token(Tk.RESWD,"*",-1))
+                tokens.insert(0,Token(Tk.NUMLIT,"-1",-1))
+                state=2
+                tkn=tokens.pop(0)
+                continue 
             # 変数だった場合
             if tkn.type==Tk.VAR:
                 # 今までに定義されている変数か判定

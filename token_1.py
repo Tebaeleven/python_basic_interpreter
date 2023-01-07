@@ -125,12 +125,13 @@ def tkn_numlit():
 				ch = inp.pop()
 				continue
 			break
-
+	if image == "+" or image == "-":
+		return Token(Tk.RESWD,image,startPos)
 	if decimal_point and decimal == 0:
-		print_msg("L001:数字として正しくない",inp.currPos())
+		print_msg("L001:数字として正しくない",startPos)
 		return None
 	if not decimal_point and integer == 0:
-		print_msg("L002:数字として正しくない",inp.currPos())
+		print_msg("L002:数字として正しくない",startPos)
 		return None
 
 	return Token(Tk.NUMLIT, image,startPos)
