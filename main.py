@@ -254,6 +254,38 @@ def main():
                 if prg.set_next()==-1:
                     break
             continue
+        if "LOAD" in st.upper():
+            load_file=st.split(" ")
+            if len(load_file) !=2:
+                print("Usage; load filename")
+                continue
+            infile=load_file[1]
+            try:
+                with open(infile,"r") as f:
+                    lines=f.readlines()
+            except Exception as e:
+                print("ロードできませんでした",e)
+                continue
+            # プログラム初期化
+            prg.clear()
+            # 一行ずつ読み込む
+            for line in lines:
+                # null continue
+                if line=="":
+                    continue
+                # トークン作成
+                tokens=make_token(line)
+
+                # エラー continue
+                if tokens==None:
+                    continue
+                # トークンの一番最初を見る
+                tkn=tokens.pop(0)
+                # もし最初が数値だったら行番号とみなす
+                if tkn.type==Tk.NUMLIT:
+                    # 行番号と一行全てのトークンをprogramに追加
+                    prg.put(int(tkn.image),tokens)
+            continue
         # トークン列を作成する
         tokens=make_token(st)
         if tokens == None:
