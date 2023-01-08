@@ -80,7 +80,9 @@ class Program:
 		
 	# 行削除
 	def del_line(self, line):
-		self.set_line(line)
+		# もし存在しない行なら中断
+		if self.set_line(line) == -1:
+			return
 		del self.program[self.lines[self.counter]]
 		del self.lines[self.counter]
 		return
