@@ -1,4 +1,5 @@
 from token_1 import *
+from program import *
 class Stack:
     """スタック"""
     def __init__(self):
@@ -224,6 +225,8 @@ def main():
     print_tkn=False
     print_stk=False
     assign={}
+    prg=Program()
+
     while True:
         st=input(">")
         if st.upper()=="QUIT":
@@ -243,6 +246,13 @@ def main():
         if st.upper()=="PRINT_VAR":
             print(assign)
             continue
+        if st.upper()=="LIST":
+            prg.set_first()
+            while True:
+                print(prg.line_image())
+                if prg.set_next()==-1:
+                    break
+            continue
         # トークン列を作成する
         tokens=make_token(st)
         if tokens == None:
@@ -252,6 +262,17 @@ def main():
                 print(token.type,token.image)
         # トークンを使って計算する
         tkn=tokens.pop(0)
+        # 一番最初のトークンが数字だったら行番号とみなす
+        if tkn.type==Tk.NUMLIT:
+            # もし行番号のみ入力されていたとき
+            if len(tokens)==1: #Tk.ENDの時のみ
+                # 数値化した行番号を渡す
+                prg.del_line(int(tkn.image))
+                continue
+
+            # 数値化した行番号を渡す
+            prg.put(int(tkn.image),tokens)
+            continue
         if tkn.isRes("print"):
             ans = expression(tokens) 
             if ans !=None:

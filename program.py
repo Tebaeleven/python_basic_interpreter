@@ -69,7 +69,7 @@ class Program:
 		# 行番号からプログラムを取得（コピー）
 		self.program[self.lines[self.counter]][:])
 
-	# 行をimageで返す
+	# 行をimageとして一文で返す
 	def line_image(self):
 		st = ""
 		num, tkns = self.get_line()
