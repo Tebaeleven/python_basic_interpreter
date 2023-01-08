@@ -25,7 +25,7 @@ def expression(tokens):
 	数字1または変数1 {{+|-|*|/} 数字2または変数2 | = }・・・
 	0               1        2              1   1
 	"""
-	global print_stk
+	global print_stk, assign
 	stk=Stack()
 	state=0
 	# 括弧
@@ -162,6 +162,7 @@ def expression(tokens):
 			# 単項演算子の入力
 			if tkn.isRes("+"):
 				#特に何もしない
+				state=2
 				tkn=tokens.pop(0)
 				continue
 			if tkn.isRes("-"):
@@ -220,6 +221,48 @@ def expression(tokens):
 			a-=b
 	return a
 
+def statement(tokens):
+
+	global assign,prg
+	
+	tkn = tokens.pop(0)
+	
+	# if tkn.isRes("goto"):
+	# 	tkn=tokens.pop(0)
+	# 	if tkn.type !=Tk.NUMLIT:
+	# 		print("行番号が正しくありません")
+	# 		return -1
+	# 	print (tkn.image)
+	# 	return int(tkn.image)
+
+	if tkn.isRes("clear"):
+		assign = {}
+		return 0
+
+	if tkn.isRes("print"):
+		ans = expression(tokens) 
+		if ans !=None:
+			print(ans)
+			return 0
+		else:
+			return -1
+
+	if tkn.type==Tk.VAR: #代入文とみなす
+		var =tkn 
+		tkn=tokens.pop(0)
+		if tkn.isRes("="):
+			ans=expression(tokens) 
+			if ans !=None:
+				assign[var.image] = ans
+				return 0
+			else:
+				return -1
+		else:
+			print_msg("A001:代入文の「＝」がない",tkn.pos)
+			return -1
+
+	print("未定義の命令",tkn.type,tkn.image)
+	return -1
 
 def main():
 	global print_stk,assign
@@ -290,7 +333,7 @@ def main():
 		if "SAVE" in st.upper():
 			save_file=st.split(" ")
 			if len(save_file) !=2:
-				print("Usage; load filename")
+				print("Usage; save filename")
 				continue
 			outfile=save_file[1]
 			try:
@@ -302,13 +345,14 @@ def main():
 						f.write(prg.line_image()+"\n")
 						if prg.set_next()==-1:
 							break
-				continue
 			except Exception as e:
 				print("セーブできませんでした",e)
+				continue
+			continue
 		
 		if st.upper()=="RUN":
-			if prg.set_first():
-				print("プログラムがありません")
+			if prg.set_first()==-1:
+				print("実行するプログラムがありません")
 				continue
 			while True:
 				_,tokens=prg.get_line()
@@ -319,14 +363,12 @@ def main():
 					continue
 				if ret==-1: #終了(STOP文など)
 					break
-
 				# retは次に実行する行番号だった場合
-				if prg.set_next()==-1:
+				if prg.set_line(ret)==-1:
 					print("そのような行番号はありません",ret)
 					break
+			continue
 
-				if prg.set_next()==-1:
-					break
 		# トークン列を作成する
 		tokens=make_token(st)
 		if tokens == None:
@@ -350,39 +392,7 @@ def main():
 		tokens.insert(0,tkn)
 		statement(tokens)
 
-def statement(tokens):
 
-	global assign,prg
-	
-	tkn = tokens.pop(0)
-	
-	if tkn.isRes("clear"):
-		assign = {}
-		return assign
 
-	if tkn.isRes("print"):
-		ans = expression(tokens) 
-		if ans !=None:
-			print(ans)
-			return 0
-		else:
-			return -1
-
-	if tkn.type==Tk.VAR: #代入文とみなす
-		var =tkn 
-		tkn=tokens.pop(0)
-		if tkn.isRes("="):
-			ans=expression(tokens) 
-			if ans !=None:
-				assign[var.image] = ans
-				return 0
-			else:
-				return 1
-		else:
-			print_msg("A001:代入文の「＝」がない",tkn.pos)
-			return -1
-
-	print("未定義の命令",tkn.type,tkn.image)
-	return -1
 if __name__ == '__main__':
 	main()

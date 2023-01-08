@@ -1,3 +1,4 @@
-   10 a = 100  
-   20 b = 20  
-   30 print a * b  
+10 a = 100  
+20 a=a+1
+30 print a
+40 goto 20
