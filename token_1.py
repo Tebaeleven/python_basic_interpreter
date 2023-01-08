@@ -7,6 +7,7 @@ restbl=[
 	"print",
 	"clear",
 	"goto",
+	"if",
 ]
 class Token:
 	"""トークン"""
@@ -53,6 +54,23 @@ def make_token(st):
 				tokens.append(tkn) 
 			else:
 				return None
+			continue
+
+		if ch =="<":
+			ch =inp.pop()
+			if ch== "=" or ch ==">":
+				tokens.append(Token(Tk.RESWD,"<",inp.currPos()-1))
+				ch = inp.pop()
+				continue
+			tokens.append(Token(Tk.RESWD,"<",inp.currPos()-1))
+
+		if ch ==">":
+			ch =inp.pop()
+			if ch== "=":
+				tokens.append(Token(Tk.RESWD,">=",inp.currPos()-1))
+				ch = inp.pop()
+				continue
+			tokens.append(Token(Tk.RESWD,">",inp.currPos()-1))
 			continue
 		# 数字トークン
 		if "0"<=ch <="9" or ch == ".":

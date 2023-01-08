@@ -221,18 +221,63 @@ def expression(tokens):
 			a-=b
 	return a
 
+def copy_until(tokens,imglist):
+	ret=[]
+
+	tkn=tokens.pop(0)
+	while tkn.type != Tk.END:
+		# 探している文字列にヒットした時の処理
+		if tkn.type == Tk.RESWD and tkn.image in imglist:
+			tokens.insert(0, tkn) # 戻す
+			ret.append(Token(Tk.END,"",-1)) #endトークンを追加
+			return ret
+		ret.append(tkn)
+		tkn=tokens.pop(0)
+	return None
+
 def statement(tokens):
 
 	global assign,prg
 	
 	tkn = tokens.pop(0)
 	
+	if tkn.isRes("if"):
+		lside=copy_until(tokens,["=","<>",">","<",">=","<="])
+		if lside==None:
+			print("条件式が正しくない（左辺）")
+			return -1
+		lval=expression(lside)
+		if lval==None:
+			return -1
+		tkn=tokens.pop(0)
+		cmp=tkn.image
+		rside=copy_until(tokens,["goto"])
+		if rside==None:
+			print("条件式が正しくない(右辺)")
+			return -1
+		rval=expression(rside)
+		if rval==None:
+			return -1
+		val = lval-rval
+		if not(cmp == "=" and val == 0 or \
+			cmp == "<>" and val != 0 or \
+			cmp == ">=" and val >= 0 or \
+			cmp == "<=" and val <= 0 or \
+			cmp == ">" and val > 0 or \
+			cmp == "<" and val < 0):
+			return 0
+		tkn = tokens.pop(0) # gotoトークンの読み飛ばし
+		tkn=tokens.pop(0)
+		if tkn.type !=Tk.NUMLIT:
+			print("行番号が正しくありません")
+			return -1
+		return int(tkn.image)
+
 	if tkn.isRes("goto"):
 		tkn=tokens.pop(0)
 		if tkn.type !=Tk.NUMLIT:
 			print("行番号が正しくありません")
 			return -1
-		print (tkn.image)
 		return int(tkn.image)
 
 	if tkn.isRes("clear"):

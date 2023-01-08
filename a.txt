@@ -1,4 +1,4 @@
-10 a = 100  
-20 a=a+1
-30 print a
-40 goto 20
+10 a = 1
+20 print a
+30 a=a+1
+40 if a < 10 goto 20
