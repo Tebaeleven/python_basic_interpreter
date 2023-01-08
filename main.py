@@ -227,13 +227,13 @@ def statement(tokens):
 	
 	tkn = tokens.pop(0)
 	
-	# if tkn.isRes("goto"):
-	# 	tkn=tokens.pop(0)
-	# 	if tkn.type !=Tk.NUMLIT:
-	# 		print("行番号が正しくありません")
-	# 		return -1
-	# 	print (tkn.image)
-	# 	return int(tkn.image)
+	if tkn.isRes("goto"):
+		tkn=tokens.pop(0)
+		if tkn.type !=Tk.NUMLIT:
+			print("行番号が正しくありません")
+			return -1
+		print (tkn.image)
+		return int(tkn.image)
 
 	if tkn.isRes("clear"):
 		assign = {}
