@@ -347,27 +347,19 @@ def main():
 			# 数値化した行番号を渡す
 			prg.put(int(tkn.image),tokens)
 			continue
-		if tkn.isRes("print"):
-			ans = expression(tokens) 
-			if ans !=None:
-				print(ans)
-			continue
-		if tkn.type==Tk.VAR: #代入文とみなす
-			var =tkn 
-			tkn=tokens.pop(0)
-			if tkn.isRes("="):
-				ans=expression(tokens) 
-				if ans !=None:
-					assign[var.image] = ans
-				else:
-					print_msg("A001:代入文の「＝」がない",tkn.pos)
-			continue
+		tokens.insert(0,tkn)
+		statement(tokens)
+
 def statement(tokens):
 
 	global assign,prg
 	
 	tkn = tokens.pop(0)
 	
+	if tkn.isRes("clear"):
+		assign = {}
+		return assign
+
 	if tkn.isRes("print"):
 		ans = expression(tokens) 
 		if ans !=None:

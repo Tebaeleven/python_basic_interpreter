@@ -5,6 +5,7 @@ class Tk(Enum):
 
 restbl=[
 	"print",
+	"clear",
 ]
 class Token:
 	"""トークン"""
