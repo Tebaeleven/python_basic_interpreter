@@ -247,7 +247,8 @@ def main():
             print(assign)
             continue
         if st.upper()=="LIST":
-            prg.set_first()
+            if prg.set_first() ==-1:
+                continue
             while True:
                 print(prg.line_image())
                 if prg.set_next()==-1:

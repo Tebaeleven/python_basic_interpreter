@@ -42,8 +42,11 @@ class Program:
 		return
 	# 最初の行に設定
 	def set_first(self):
+		# もし行データがなければエラー
+		if len(self.lines) == 0:
+			return -1
 		self.counter = 0
-		return
+		return 0
 
 	# 次の行に進める
 	def set_next(self):
