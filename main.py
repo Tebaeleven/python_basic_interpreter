@@ -286,6 +286,25 @@ def main():
                     # 行番号と一行全てのトークンをprogramに追加
                     prg.put(int(tkn.image),tokens)
             continue
+        if "SAVE" in st.upper():
+            save_file=st.split(" ")
+            if len(save_file) !=2:
+                print("Usage; load filename")
+                continue
+            outfile=save_file[1]
+            try:
+                with open(outfile,"w") as f:
+                    if prg.set_first()==-1:
+                        print("プログラムがありません")
+                        continue
+                    while True:
+                        f.write(prg.line_image()+"\n")
+                        if prg.set_next()==-1:
+                            break
+                continue
+            except Exception as e:
+                print("セーブできませんでした",e)
+
         # トークン列を作成する
         tokens=make_token(st)
         if tokens == None:
