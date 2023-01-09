@@ -234,17 +234,26 @@ def copy_until(tokens,imglist):
 		ret.append(tkn)
 		tkn=tokens.pop(0)
 	return None
+def print_err(msg):
+	global prg,running_flg
+	
+	if running_flg:
+		print(prg.line_image())
+	print(msg)
 
 def statement(tokens):
 
-	global assign,prg
+	global assign,prg,trace_flg,running_flg
 	
+	if trace_flg and running_flg:
+		print("exec:" + prg.line_image())
+
 	tkn = tokens.pop(0)
 	
 	if tkn.isRes("if"):
 		lside=copy_until(tokens,["=","<>",">","<",">=","<="])
 		if lside==None:
-			print("条件式が正しくない（左辺）")
+			print_err("条件式が正しくない（左辺）")
 			return -1
 		lval=expression(lside)
 		if lval==None:
@@ -253,7 +262,7 @@ def statement(tokens):
 		cmp=tkn.image
 		rside=copy_until(tokens,["goto"])
 		if rside==None:
-			print("条件式が正しくない(右辺)")
+			print_err("条件式が正しくない(右辺)")
 			return -1
 		rval=expression(rside)
 		if rval==None:
@@ -269,14 +278,14 @@ def statement(tokens):
 		tkn = tokens.pop(0) # gotoトークンの読み飛ばし
 		tkn=tokens.pop(0)
 		if tkn.type !=Tk.NUMLIT:
-			print("行番号が正しくありません")
+			print_err("行番号が正しくありません")
 			return -1
 		return int(tkn.image)
 
 	if tkn.isRes("goto"):
 		tkn=tokens.pop(0)
 		if tkn.type !=Tk.NUMLIT:
-			print("行番号が正しくありません")
+			print_err("行番号が正しくありません")
 			return -1
 		return int(tkn.image)
 
@@ -303,16 +312,20 @@ def statement(tokens):
 			else:
 				return -1
 		else:
-			print_msg("A001:代入文の「＝」がない",tkn.pos)
+			print_err("A001:代入文の「＝」がない")
 			return -1
 
-	print("未定義の命令",tkn.type,tkn.image)
+	print_err("未定義の命令")
 	return -1
 
 def main():
-	global print_stk,assign
+	global print_stk,assign,trace_flg,prg,running_flg
+
 	print_tkn=False
 	print_stk=False
+	trace_flg=False
+	running_flg=False
+
 	assign={}
 	prg=Program()
 
@@ -335,6 +348,13 @@ def main():
 		if st.upper()=="PRINT_VAR":
 			print(assign)
 			continue
+		if st.upper()=="TRACE ON":
+			trace_flg=True
+			continue
+		if st.upper()=="TRACE OFF":
+			trace_flg=False
+			continue
+			
 		if st.upper()=="LIST":
 			if prg.set_first() ==-1:
 				continue
@@ -399,6 +419,7 @@ def main():
 			if prg.set_first()==-1:
 				print("実行するプログラムがありません")
 				continue
+			running_flg=True
 			while True:
 				_,tokens=prg.get_line()
 				ret = statement(tokens)
@@ -410,8 +431,9 @@ def main():
 					break
 				# retは次に実行する行番号だった場合
 				if prg.set_line(ret)==-1:
-					print("そのような行番号はありません",ret)
+					print_err("そのような行番号はありません")
 					break
+			running_flg=False
 			continue
 
 		# トークン列を作成する
