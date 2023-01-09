@@ -8,6 +8,10 @@ restbl=[
 	"clear",
 	"goto",
 	"if",
+	"for",
+	"to",
+	"step",
+	"next",
 ]
 class Token:
 	"""トークン"""
